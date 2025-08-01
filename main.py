@@ -11,26 +11,26 @@ async def run(email, password):
         try:
             await page.goto("https://www.naukri.com/mnjuser/login", wait_until="load")
 
-            # Wait for login form
-            await page.wait_for_selector('input[name="username"]', timeout=15000)
-            
+            # Fill login form using placeholder attributes
+            await page.wait_for_selector('input[placeholder="Email ID / Username"]', timeout=15000)
             await page.fill('input[placeholder="Email ID / Username"]', email)
             await page.fill('input[placeholder="Password"]', password)
-            await page.click('//button[@type="submit"]')
 
-            # Wait for the dashboard/homepage
+            await page.click('button[type="submit"]')
+
+            # Wait for login and redirect
             await page.wait_for_load_state('networkidle')
-            await page.wait_for_timeout(3000)  # Let page settle
+            await page.wait_for_timeout(3000)
 
-            # Refresh/Update Resume
+            # Go to profile and click Update
             await page.goto("https://www.naukri.com/mnjuser/profile", wait_until="load")
             await page.wait_for_selector('button:has-text("Update")', timeout=15000)
             await page.click('button:has-text("Update")')
-            print("✅ Resume refreshed successfully for", email)
+            print(f"✅ Resume refreshed successfully for {email}")
 
         except Exception as e:
             print(f"❌ Error occurred for {email}: {e}")
-            print(await page.content())  # Debug the page state
+            print(await page.content())  # Useful for debugging HTML state
             raise e
 
         finally:

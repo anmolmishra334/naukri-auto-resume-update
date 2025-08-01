@@ -1,0 +1,46 @@
+name: Resume Refresh (Both Accounts)
+
+on:
+  schedule:
+    - cron: "0 * * * *"  # every hour
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        playwright install
+
+    - name: Resume refresh for profile 1
+      env:
+        EMAIL: ${{ secrets.NAUKRI_EMAIL_1 }}
+        PASSWORD: ${{ secrets.NAUKRI_PASSWORD_1 }}
+      run: |
+        python main.py "$EMAIL" "$PASSWORD" || python send_alert.py
+
+    - name: Resume refresh for profile 2
+      env:
+        EMAIL: ${{ secrets.NAUKRI_EMAIL_2 }}
+        PASSWORD: ${{ secrets.NAUKRI_PASSWORD_2 }}
+      run: |
+        python main.py "$EMAIL" "$PASSWORD" || python send_alert.py
+
+    - name: Send alert if needed
+      if: failure()
+      env:
+        GMAIL_USER: ${{ secrets.GMAIL_USER }}
+        GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+        ALERT_RECEIVER: ${{ secrets.ALERT_RECEIVER }}
+      run: python send_alert.py

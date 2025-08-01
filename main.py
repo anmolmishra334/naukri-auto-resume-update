@@ -13,8 +13,9 @@ async def run(email, password):
 
             # Wait for login form
             await page.wait_for_selector('input[name="username"]', timeout=15000)
-            await page.fill('input[name="username"]', email)
-            await page.fill('input[name="password"]', password)
+            
+            await page.fill('input[placeholder="Email ID / Username"]', email)
+            await page.fill('input[placeholder="Password"]', password)
             await page.click('//button[@type="submit"]')
 
             # Wait for the dashboard/homepage
